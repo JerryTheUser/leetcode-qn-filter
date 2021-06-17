@@ -18,7 +18,6 @@ class Question(Base):
     totalSubmits = Column(Integer)
     likes = Column(Integer)
     dislike = Column(Integer)
-    # tags = Column(String)
 
 def createDB(dbName='question.db'):
     engine = create_engine('sqlite:///{}'.format(dbName), echo=True)
@@ -63,8 +62,25 @@ def createQuestionObj(questionObj):
     ret.totalAcs = stats['totalAcceptedRaw']
     ret.totalSubmits = stats['totalSubmissionRaw']
     ret.totalAcsRate = stats['acRate']
-    #ret[tags] = TODO
     return ret
+
+def questionToObj(questions):
+    rets = list()
+    for question in questions:
+        ret = {
+            'questionID' : question.questionID,
+            'questionIndex' : question.questionIndex,
+            'questionTitle' : question.questionTitle,
+            'paidOnly' : question.paidOnly,
+            'difficulty' : question.difficulty,
+            'likes' : question.likes,
+            'dislike' : question.dislike,
+            'totalAcs' : question.totalAcs,
+            'totalSubmits' : question.totalSubmits,
+            'totalAcsRate' : question.totalAcsRate
+        }
+        rets.append(ret)
+    return rets
 
 def insertAllQuestions(questions): 
     objs = list()
@@ -80,22 +96,6 @@ def insertAllQuestions(questions):
     session.commit()
     pass
 
-'''
-def commitTester(questions):
-    objs = list()
-    cur = 0
-    for iter in range(0,3):
-        cur += 1
-        questionInfo = getQuestionInfo(questions[iter])
-        questionObj = createQuestionObj(questionInfo)
-        print('({}) / ({}) : {}, {}'.format(cur, len(questions), questionObj.questionIndex, questionObj.questionTitle))
-        objs.append(questionObj)   
-    session = createSession()
-    session.add_all(objs)
-    session.commit()
-    pass
-'''
-
 def queryBase():
     session = createSession()
     rets = session.query(Question)
@@ -109,6 +109,10 @@ def queryDislikes(query, num):
     rets = query.filter(Question.dislike > num)
     return rets
 
+def queryDiff(query, diff):
+    rets = query.filter(Question.difficulty == diff)
+    return rets
+
 def queryLimit(query, num):
     rets = query.limit(num)
     return rets
@@ -117,18 +121,7 @@ def queryExec(query):
     rets = query.all()
     return rets
 
-def main():
-    #createDB()
-    #questions = fetchAllQuestion()
-    #insertAllQuestions(questions)
-    
-    rets = queryBase()
-    rets = queryLikes(rets, 100)
-    rets = queryDislikes(rets, 100)
-    rets = queryLimit(rets, 10)
-    rets = queryExec(rets)
-    for ret in rets :
-        print('{}, {}'.format(ret.questionID, ret.questionTitle))
-
-if __name__ == '__main__':
-    main()
+def build():
+    createDB()
+    questions = fetchAllQuestion()
+    insertAllQuestions(questions)
