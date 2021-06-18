@@ -5,11 +5,11 @@
         <th>Title</th>
         <th>PaidOnly</th>
         <th>Difficulty</th>
-        <th>Acs</th>
-        <th>AcsRate</th>
-        <th>Submits</th>
-        <th>Likes</th>
+        <th>Likes</th> 
         <th>Dislikes</th>
+        <th>Acs</th>
+        <th>Submits</th>
+        <th>AcsRate</th>
     </tr>
     </thead>
     <tbody>
@@ -19,11 +19,11 @@
                 <td>{{row.questionTitle}}</td>
                 <td>{{row.paidOnly}}</td>
                 <td>{{row.difficulty}}</td>
-                <td>{{row.totalAcs}}</td>
-                <td>{{row.totalAcsRate}}</td>
-                <td>{{row.totalSubmits}}</td>
                 <td>{{row.likes}}</td>
-                <td>{{row.dislike}}</td>
+                <td>{{row.dislikes}}</td>
+                <td>{{row.totalAcs}}</td>
+                <td>{{row.totalSubmits}}</td>
+                <td>{{row.totalAcsRate}}%</td>
             </tr>
         {% endfor %}
     </tbody>

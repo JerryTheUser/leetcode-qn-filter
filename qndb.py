@@ -1,6 +1,6 @@
 import json
 import requests
-from sqlalchemy import create_engine, Table, Column, Integer, String, MetaData, ForeignKey
+from sqlalchemy import create_engine, Table, Column, Integer, String, Float, MetaData, ForeignKey
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -14,10 +14,10 @@ class Question(Base):
     paidOnly = Column(Integer)
     difficulty = Column(String)
     totalAcs = Column(Integer)
-    totalAcsRate = Column(String)
+    totalAcsRate = Column(Float)
     totalSubmits = Column(Integer)
     likes = Column(Integer)
-    dislike = Column(Integer)
+    dislikes = Column(Integer)
 
 def createDB(dbName='question.db'):
     engine = create_engine('sqlite:///{}'.format(dbName), echo=True)
@@ -32,19 +32,21 @@ def createSession(dbName='question.db'):
     return session
 
 def fetchAllQuestion():
+    url = 'https://leetcode.com/api/problems/all/'
     ret =list()
-    response = requests.get('https://leetcode.com/api/problems/all/')
+    response = requests.get(url)
     responseJson = response.json()
     for stat_status_pair in responseJson['stat_status_pairs']:
         ret.append(stat_status_pair['stat']['question__title_slug'])
     return ret
 
 def getQuestionInfo(name):
+    url = 'https://leetcode.com/graphql'
     query = """query questionData($titleSlug: String!) {\n  question(titleSlug: $titleSlug) {\n    questionId\n    questionFrontendId\n    title\n    isPaidOnly\n    difficulty\n    likes\n    dislikes\n    topicTags {\n      name\n      translatedName}\n    companyTagStats\n    stats\n    status\n    }\n}\n"""
     body = {"operationName":"questionData",
             "variables":{"titleSlug":name},
             "query":query}
-    response = requests.post('https://leetcode.com/graphql', json=body)
+    response = requests.post(url, json=body)
     responseJson = response.json()
     return responseJson["data"]["question"]
 
@@ -56,12 +58,14 @@ def createQuestionObj(questionObj):
     ret.paidOnly = questionObj['isPaidOnly']
     ret.difficulty = questionObj['difficulty']
     ret.likes = questionObj['likes']
-    ret.dislike = questionObj['dislikes']
+    ret.dislikes = questionObj['dislikes']
     
     stats = json.loads(questionObj['stats'])
     ret.totalAcs = stats['totalAcceptedRaw']
     ret.totalSubmits = stats['totalSubmissionRaw']
-    ret.totalAcsRate = stats['acRate']
+    
+    string = stats['acRate'][0:-1]
+    ret.totalAcsRate = float(string)
     return ret
 
 def questionToObj(questions):
@@ -74,7 +78,7 @@ def questionToObj(questions):
             'paidOnly' : question.paidOnly,
             'difficulty' : question.difficulty,
             'likes' : question.likes,
-            'dislike' : question.dislike,
+            'dislikes' : question.dislikes,
             'totalAcs' : question.totalAcs,
             'totalSubmits' : question.totalSubmits,
             'totalAcsRate' : question.totalAcsRate
@@ -86,42 +90,19 @@ def insertAllQuestions(questions):
     objs = list()
     cur = 0
     for question in questions:
+        session = createSession()
         cur += 1
         questionInfo = getQuestionInfo(question)
         questionObj = createQuestionObj(questionInfo)
         print('({}) / ({}) : {}, {}'.format(cur, len(questions), questionObj.questionIndex, questionObj.questionTitle))
         objs.append(questionObj)   
-    session = createSession()
+        #session.add(questionObj)
+        #session.commit()
     session.add_all(objs)
     session.commit()
     pass
 
-def queryBase():
-    session = createSession()
-    rets = session.query(Question)
-    return rets
-
-def queryLikes(query, num):
-    rets = query.filter(Question.likes > num)
-    return rets
-
-def queryDislikes(query, num):
-    rets = query.filter(Question.dislike > num)
-    return rets
-
-def queryDiff(query, diff):
-    rets = query.filter(Question.difficulty == diff)
-    return rets
-
-def queryLimit(query, num):
-    rets = query.limit(num)
-    return rets
-
-def queryExec(query):
-    rets = query.all()
-    return rets
-
-def build():
+def buildDB():
     createDB()
     questions = fetchAllQuestion()
     insertAllQuestions(questions)
