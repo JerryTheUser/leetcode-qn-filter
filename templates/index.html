@@ -7,81 +7,102 @@
     <script src="https://kit.fontawesome.com/baab9bffc5.js" crossorigin="anonymous"></script>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     
-    <title>Leetcode Question Filter</title>
+    <title>LeetCode Question Filter</title>
   </head>
   <body>
-    <h1 align='center'> Leetcode Question Filter </h1>
+    <h1 align='center' style="margin-top: 20px; margin-bottom: 20px;"> LeetCode Question Filter </h1>
     
-    <div class="container">
-      <div class="row align-items-center">
-        
-        <div class="col-sm-2">
+    <form class="row g-3">
+
+        <div class="col"> 
           <div class="input-group">
             <div class="input-group-text">PaidOnly</div>
-            <select class="form-select form-select-sm" id="paidonly" >
-              <option selected value="Null"></option>
-              <option value=1 >Yes</option>
-              <option value=0 >No</option>
-            </select>
-          </div>
-        </div>
-        
-        <div class="col-sm-2">
-          <div class="input-group">
-            <div class="input-group-text">Difficulty</div>
-            <select class="form-select form-select-sm" id="difficulty" >
-              <option selected value="null"></option>
-              <option value="Easy">Easy</option>
-              <option value="Medium">Medium</option>
-              <option value="Hard">Hard</option>
+            <select class="form-select form-select-sm" id="paidonly">
+              <option selected value="-1">Any</option>
+              <option value="1" >Yes</option>
+              <option value="0" >No</option>
             </select>
           </div>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col">
           <div class="input-group">
-            <div class="input-group-text">Likes</div>
+            <div class="input-group-text">Difficulty</div>
+              <select class="form-select form-select-sm" id="difficulty" >
+                <option selected value="null">Any</option>
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+          </div>
+        </div>
+        
+        <div class="col">
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button" id="likesDesc">Likes</button>
             <input type="text" class="form-control form-control-sm" id="likes">
           </div>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col">
           <div class="input-group">
-            <div class="input-group-text">Dislikes</div>
+            <button class="btn btn-outline-secondary" type="button" id="dislikesDesc">Dislikes</button>
             <input type="text" class="form-control form-control-sm" id="dislikes">
           </div>
         </div>
         
-        <div class="col-sm-2">
+        <div class="col">
           <div class="input-group">
-            <div class="input-group-text">Acs</div>
+            <button class="btn btn-outline-secondary" type="button" id="acsDesc">Acs</button>
             <input type="text" class="form-control form-control-sm" id="acs">
           </div>
         </div>
 
-        <div class="col-sm-2">
+        <div class="col">
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button" id="submitsDesc">Submits</button>
+            <input type="text" class="form-control form-control-sm" id="submits">
+          </div>
+        </div>
+
+        <div class="col">
+          <div class="input-group">
+            <button class="btn btn-outline-secondary" type="button" id="acsrateDesc">AcsRate</button>
+            <input type="text" class="form-control form-control-sm" id="acsrate">
+          </div>
+        </div>
+
+        <div class="col">
           <div class="input-group">
             <div class="input-group-text">Numbers</div>
             <input type="text" class="form-control form-control-sm" id="limits">
           </div>
         </div>
 
-        <button type="button" class="btn btn-danger col-sm-2" id="refresh">RefreshDB</button>
+        <button type="button" class="btn btn-danger col" id="refresh">RefreshDB</button>
+      </form>
 
-      </div>
-    </div>
-
-    <div id="replacement"></div>
+    <div id="replacement" style="margin-top: 20px;"></div>
+    
     <script>
       $(document).ready(function(){
 
         data = { 
           "paidonly" : -1,
           "likes" : 0,
-          "likesDes" : 1,
+          "likesdesc" : 1,
           "dislikes" : 0,
+          "dislikesdesc": 1,
           "difficulty" : "null",
-          "limits" : 10 };
+          "acs" : 0,
+          "acsdesc" : 1,
+          "submits" : 0,
+          "submitsdesc" : 1,
+          "acsrate" : 0,
+          "acsratedesc" : 1,
+          "descitem" : "likes",
+          "limits" : 10
+        };
         
         $("#paidonly").change(function(e){
           data['paidonly'] = $('#paidonly').val();
@@ -95,14 +116,27 @@
         });
 
         $("#likes").change(function(e){
-            data['likes'] = $('#likes').val();
-            $.ajax({
-              url: "{{ url_for('filter') }}",
-                type:'POST',
-                data: data,
-                success:function(reponse){ $('#replacement').html(reponse); },
-                error:function(e){ alert("Fail");}
-              })
+          data['likes'] = $('#likes').val();
+          $.ajax({
+            url: "{{ url_for('filter') }}",
+              type:'POST',
+              data: data,
+              success:function(reponse){ $('#replacement').html(reponse); },
+              error:function(e){ alert("Fail");}
+            })
+        });
+
+        $("#likesDesc").click(function(e){
+          if(data['likesdesc'] == 1) {data['likesdesc'] = 0;}
+          else {data['likesdesc'] = 1};
+          data['descitem'] = "likesdesc";
+          $.ajax({
+            url: "{{ url_for('filter') }}",
+              type:'POST',
+              data: data,
+              success:function(reponse){ $('#replacement').html(reponse); },
+              error:function(e){ alert("Fail");}
+            })
         });
         
         $("#dislikes").change(function(e){
@@ -116,6 +150,19 @@
               })
         });
 
+        $("#dislikesDesc").click(function(e){
+          if(data['dislikesdesc'] == 1) {data['dislikesdesc'] = 0;}
+          else {data['dislikesdesc'] = 1};
+          data['descitem'] = "dislikesdesc";
+          $.ajax({
+            url: "{{ url_for('filter') }}",
+              type:'POST',
+              data: data,
+              success:function(reponse){ $('#replacement').html(reponse); },
+              error:function(e){ alert("Fail");}
+            })
+        });
+
         $("#difficulty").change(function(e){
             data['difficulty'] = $('#difficulty').val();
             $.ajax({
@@ -127,8 +174,8 @@
             });
         });
 
-        $("#limits").change(function(e){
-            data['limits'] = $('#limits').val();
+        $("#acs").change(function(e){
+            data['acs'] = $('#acs').val();
             $.ajax({
                 url: "{{ url_for('filter') }}",
                 type: 'POST',
@@ -138,10 +185,69 @@
             });
         });
 
-        $("#likesIcon").click(function(e){
-            if(data['likesDes'] == 1) { data['likesDes'] = 0; }
-            else { data['likeSDes'] = 1; }
-            alert(data['likesDes']);
+        $("#acsDesc").click(function(e){
+          if(data['acsdesc'] == 1) {data['acsdesc'] = 0;}
+          else {data['acsdesc'] = 1};
+          data['descitem'] = "acsdesc";
+          $.ajax({
+            url: "{{ url_for('filter') }}",
+              type:'POST',
+              data: data,
+              success:function(reponse){ $('#replacement').html(reponse); },
+              error:function(e){ alert("Fail");}
+            })
+        });
+
+        $("#submits").change(function(e){
+            data['submits'] = $('#submits').val();
+            $.ajax({
+                url: "{{ url_for('filter') }}",
+                type: 'POST',
+                data: data,
+                success:function(reponse){ $('#replacement').html(reponse); },
+                error:function(e){ alert("Fail"); }
+            });
+        });
+
+        $("#submitsDesc").click(function(e){
+          if(data['submitsdesc'] == 1) {data['submitsdesc'] = 0;}
+          else {data['submitsdesc'] = 1};
+          data['descitem'] = "submitsdesc";
+          $.ajax({
+            url: "{{ url_for('filter') }}",
+              type:'POST',
+              data: data,
+              success:function(reponse){ $('#replacement').html(reponse); },
+              error:function(e){ alert("Fail");}
+            })
+        });
+
+        $("#acsrate").change(function(e){
+            data['acsrate'] = $('#acsrate').val();
+            $.ajax({
+                url: "{{ url_for('filter') }}",
+                type: 'POST',
+                data: data,
+                success:function(reponse){ $('#replacement').html(reponse); },
+                error:function(e){ alert("Fail"); }
+            });
+        });
+
+        $("#acsrateDesc").click(function(e){
+          if(data['acsratedesc'] == 1) {data['acsratedesc'] = 0;}
+          else {data['acsratedesc'] = 1};
+          data['descitem'] = "acsratedesc";
+          $.ajax({
+            url: "{{ url_for('filter') }}",
+              type:'POST',
+              data: data,
+              success:function(reponse){ $('#replacement').html(reponse); },
+              error:function(e){ alert("Fail");}
+            })
+        });
+
+        $("#limits").change(function(e){
+            data['limits'] = $('#limits').val();
             $.ajax({
                 url: "{{ url_for('filter') }}",
                 type: 'POST',

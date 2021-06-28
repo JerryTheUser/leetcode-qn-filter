@@ -96,8 +96,6 @@ def insertAllQuestions(questions):
         questionObj = createQuestionObj(questionInfo)
         print('({}) / ({}) : {}, {}'.format(cur, len(questions), questionObj.questionIndex, questionObj.questionTitle))
         objs.append(questionObj)   
-        #session.add(questionObj)
-        #session.commit()
     session.add_all(objs)
     session.commit()
     pass
